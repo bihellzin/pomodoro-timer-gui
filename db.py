@@ -1,44 +1,44 @@
 import sqlite3
 
-def create_db():
-  conection = sqlite3.connect('profiles.db')
-  cursor = conection.cursor()
 
-  cursor.execute('''
-    create table profiles(
-      concentration text,
-      short_break text)
-  ''')
+class Database:
+  def __init__(self):
+    self.conection = sqlite3.connect('profiles.db')
+    self.cursor = self.conection.cursor()
 
-  conection.commit()
-  cursor.close()
-  conection.close()
+    self.cursor.execute('CREATE TABLE IF NOT EXISTS profiles(id INTEGER PRIMARY KEY, \
+        concentration text, \
+        short_break text)'
+    )
 
-
-def add_to_db(data: list):
-  conection = sqlite3.connect('profiles.db')
-  cursor = conection.cursor()
-
-  cursor.execute('''
-    insert into profiles (concentration, short_break)
-    values(?, ?)
-  ''', (data[0], data[1]))
-
-  conection.commit()
-  cursor.close()
-  conection.close()
+    self.conection.commit()
 
 
-def check_db():
-  conection = sqlite3.connect('profiles.db')
-  cursor = conection.cursor()
+  def add(self, data: list):
+    self.cursor.execute(
+      'INSERT INTO profiles VALUES(NULL, ?, ?) \
+    ', (data[0], data[1]))
 
-  cursor.execute('select * from profiles')
+    self.conection.commit()
 
-  result = cursor.fetchone()
+
+  def check_db(self):
+    self.cursor.execute('SELECT * FROM profiles')
+
+    result = self.cursor.fetchall()
+    
+    print(result)
+
+    self.conection.commit()
   
-  print(result)
 
-  conection.commit()
-  cursor.close()
-  conection.close()
+  def remove(self, id: int):
+    self.cursor.execute('DELETE FROM profiles WHERE id=?', (id,))
+    self.conection.commit()
+  
+
+  def update(self, id: int, data: list):
+    self.cursor.execute("UPDATE profiles SET concentration = ?, short_break = ? \
+    WHERE id = ?", (data[0], data[1], id))
+
+    self.conection.commit()
